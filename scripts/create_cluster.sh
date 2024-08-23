@@ -3,6 +3,11 @@
 #!/bin/bash
 clear
 
+# disable ipv6 for docker
+sudo su -c "./fix_docker.sh"
+
+
+
 # Most of the coding segments in the book have been removed to make room for additional technical contact.  Scripts will now
 # contain more documentation to help users understand what the scripts are executing.
 tput setaf 3
@@ -63,20 +68,6 @@ echo -e "***********************************************************************
 tput setaf 3
 kubectl label node cluster01-worker ingress-ready=true
 
-# Install Calico
-# The Calico scripts have been downloaded and added to the GIT repo to maintain the best release to use with KinD
-# The only changes to the scripts is the POD CIDR range we use which needs to match the range in the custom-resoures.yaml manifest.
-#     ipPools:
-#    - blockSize: 26
-#      cidr: 10.240.0.0/16
-# Of this doesnt match the CIDR range of the KinD cluster, Calico will fail to start.
-
-echo -e "\n \n*******************************************************************************************************************"
-echo -e "Install Calico from local file, using 10.240.0.0/16 as the pod CIDR"
-echo -e "*******************************************************************************************************************"
-tput setaf 3
-kubectl create -f calico/tigera-operator.yaml
-kubectl create -f calico/custom-resources.yaml
 
 # Deploy NGINX
 # This is a standard nginx-deployment manifest that has been downloaded to the book repo to maintain compatibility with the KiND
