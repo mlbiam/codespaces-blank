@@ -98,6 +98,12 @@ data:
     member: cn=mmosley,ou=Users,DC=domain,DC=com
     member: cn=pipeline_svc_account,ou=Users,DC=domain,DC=com
 
+    dn: cn=openunison-admins,ou=Groups,DC=domain,DC=com
+    objectClass: group
+    cn: openunison-admins
+    member: cn=mmosley,ou=Users,DC=domain,DC=com
+    
+
     dn: cn=group2,ou=Groups,DC=domain,DC=com
     objectClass: group
     cn: group2
@@ -107,6 +113,18 @@ data:
     objectClass: group
     cn: k8s-create-ns
     member: cn=jjackson,ou=Users,DC=domain,DC=com
+
+    dn: cn=vcluster-test-admin,ou=groups,dc=domain,dc=com
+    objectClass: group
+    cn: vcluster-test-admin
+    member: cn=jjackson,ou=Users,DC=domain,DC=com
+    member: cn=mmosley,ou=Users,DC=domain,DC=com
+
+    dn: cn=vcluster-test-view,ou=groups,dc=domain,dc=com
+    objectClass: group
+    cn: vcluster-test-view
+    member: cn=jjackson,ou=Users,DC=domain,DC=com
+    member: cn=mmosley,ou=Users,DC=domain,DC=com
 ---
 apiVersion: apps/v1
 kind: Deployment

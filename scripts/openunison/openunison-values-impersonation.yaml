@@ -24,9 +24,9 @@ cert_template:
 
 myvd_config_path: "WEB-INF/myvd.conf"
 k8s_cluster_name: control-plane
-enable_impersonation: false
+enable_impersonation: true
 impersonation:
-  use_jetstack: true
+  use_jetstack: false
   explicit_certificate_trust: false
 
 dashboard:
@@ -121,8 +121,8 @@ openunison:
         enabled: false
       external:
         enabled: true
-        adminGroup: cn=k8s-cluster-admins,ou=Groups,DC=domain,DC=com
-        clusterAdminGroup: cn=openunison-admins,ou=Groups,DC=domain,DC=com
+        adminGroup: cn=openunison-admins,ou=Groups,DC=domain,DC=com
+        clusterAdminGroup: cn=k8s-cluster-admins,ou=Groups,DC=domain,DC=com
 
 
 myvd_configmap: myvd-book
