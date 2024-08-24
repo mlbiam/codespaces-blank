@@ -74,10 +74,12 @@ kubectl label node cluster01-worker ingress-ready=true
 # version we use for the book.  Newer releases may work, but there is no guarantee.
 tput setaf 5
 echo -e "\n \n*******************************************************************************************************************"
-echo -e "Install NGINX Ingress Controller"
+echo -e "Install Traefik Ingress Controller"
 echo -e "*******************************************************************************************************************"
 tput setaf 3
-kubectl create -f nginx-ingress/nginx-deploy.yaml
+helm repo add traefik https://traefik.github.io/charts
+kubectl create ns traefik
+helm install traefik traefik/traefik --version 30.1.0 -n traefik -f traefik/traefik-values.yaml
 
 # Find IP address of Docker Host
 # We need to know the IP of the Host since we use nip.io for name resolution.  Nip.ip names follow the standard <url>.<host ip>.nip.io

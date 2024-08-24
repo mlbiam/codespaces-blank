@@ -1,0 +1,9 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: map-host
+  namespace: openunison
+spec:
+  headers:
+    customRequestHeaders:
+      Host: "symmetrical-chainsaw-wprx7qggpgfwgj-443.app.github.dev"
