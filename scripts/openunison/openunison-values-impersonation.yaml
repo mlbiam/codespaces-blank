@@ -9,6 +9,7 @@ network:
   ingress_type: nginx
   ingress_annotations:
     kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: enterprise-ca
   
 
   
@@ -23,10 +24,10 @@ cert_template:
 
 myvd_config_path: "WEB-INF/myvd.conf"
 k8s_cluster_name: control-plane
-enable_impersonation: true
+enable_impersonation: false
 impersonation:
   use_jetstack: true
-  explicit_certificate_trust: true
+  explicit_certificate_trust: false
 
 dashboard:
   namespace: "kubernetes-dashboard"
