@@ -1,0 +1,25 @@
+apiVersion: openunison.tremolo.io/v1
+kind: Trust
+metadata:
+  labels:
+    app.kubernetes.io/name: openunison
+    app.kubernetes.io/instance: openunison-orchestra
+    app.kubernetes.io/component: akeyless-sso
+    app.kubernetes.io/part-of: openunison
+  name: akeyless
+  namespace: {{ .Release.Namespace }}
+spec:
+  accessTokenSkewMillis: 120000
+  accessTokenTimeToLive: 60000
+  authChainName: login-service
+  clientId: akeyless
+  clientSecret:
+     keyName: akeyless
+     secretName: orchestra-secrets-source
+  codeLastMileKeyName: lastmile-oidc
+  codeTokenSkewMilis: 60000
+  publicEndpoint: false
+  redirectURI:
+  - https://console.akeyless.io/login-oidc
+  signedUserInfo: false
+  verifyRedirect: true

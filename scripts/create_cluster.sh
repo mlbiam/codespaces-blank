@@ -74,12 +74,11 @@ kubectl label node cluster01-worker ingress-ready=true
 # version we use for the book.  Newer releases may work, but there is no guarantee.
 tput setaf 5
 echo -e "\n \n*******************************************************************************************************************"
-echo -e "Install Traefik Ingress Controller"
+echo -e "Install NGINX Ingress Controller"
 echo -e "*******************************************************************************************************************"
 tput setaf 3
-helm repo add traefik https://traefik.github.io/charts
-kubectl create ns traefik
-helm install traefik traefik/traefik --version 30.1.0 -n traefik -f traefik/traefik-values.yaml
+kubectl create -f nginx-ingress/nginx-deploy.yaml
+
 
 # Find IP address of Docker Host
 # We need to know the IP of the Host since we use nip.io for name resolution.  Nip.ip names follow the standard <url>.<host ip>.nip.io
@@ -103,3 +102,9 @@ echo -e "          Your ingress rule would use the hostname: ordering.$hostip.ni
 echo -e "******************************************************************************************************************* \n\n"
 
 tput setaf 2
+
+
+
+sudo curl -o /usr/bin/akeyless https://akeyless-cli.s3.us-east-2.amazonaws.com/cli/latest/production/cli-linux-amd64
+sudo chmod +x /usr/bin/akeyless
+

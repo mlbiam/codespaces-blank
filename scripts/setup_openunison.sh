@@ -2,13 +2,7 @@
 
 # install pen to setup additional ports to forward
 sudo apt-get update
-sudo apt-get install pen
-
-# setup ouctl
-echo "Downloading the ouctl utility to /tmp/ouctl"
-
-wget https://nexus.tremolo.io/repository/ouctl/ouctl-0.0.12-linux -O /tmp/ouctl
-chmod +x /tmp/ouctl
+sudo apt-get install -y pen
 
 # setup pen for the dashboard and API server
 pen 10444 127.0.0.1:443
@@ -95,6 +89,7 @@ echo -n 'start123' > /tmp/secret/OU_JDBC_PASSWORD
 echo -n 'start123' > /tmp/secret/SMTP_PASSWORD
 echo -n 'start123' > /tmp/secret/K8S_DB_SECRET
 echo -n 'start123' > /tmp/secret/unisonKeystorePassword
+openssl rand -base64 32 > /tmp/secret/akeyless
 
 kubectl create secret generic orchestra-secrets-source -n openunison --from-file=/tmp/secret
 
@@ -105,6 +100,8 @@ helm upgrade --install orchestra tremolo/orchestra --namespace openunison -f /tm
 while [[ $(kubectl get pods -l app=openunison-orchestra -n openunison -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for pod" && sleep 1; done
 helm upgrade --install orchestra-login-portal tremolo/orchestra-login-portal --namespace openunison -f /tmp/openunison-values.yaml
 helm upgrade --install cluster-management tremolo/openunison-k8s-cluster-management -n openunison -f /tmp/openunison-values.yaml
+
+kubectl apply -f openunison/localhost-ingress.yaml
 
 
 

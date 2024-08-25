@@ -5,13 +5,8 @@ network:
   session_inactivity_timeout_seconds: 900
   k8s_url: https://0.0.0.0:6443
   force_redirect_to_tls: true
-  createIngressCertificate: true
-  ingress_type: traefik
-  traefik:
-    secure: true
-    entrypoints:
-      plaintext: web
-      tls: websecure
+  createIngressCertificate: false
+  ingress_type: nginx
   
 
   
@@ -28,7 +23,7 @@ myvd_config_path: "WEB-INF/myvd.conf"
 k8s_cluster_name: control-plane
 enable_impersonation: true
 impersonation:
-  use_jetstack: true
+  use_jetstack: false
   explicit_certificate_trust: false
 
 dashboard:
