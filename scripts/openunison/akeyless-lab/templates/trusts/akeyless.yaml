@@ -21,5 +21,6 @@ spec:
   publicEndpoint: false
   redirectURI:
   - https://console.akeyless.io/login-oidc
+  - https://auth.akeyless.io/oidc/callback
   signedUserInfo: false
   verifyRedirect: true

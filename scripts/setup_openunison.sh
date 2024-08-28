@@ -89,7 +89,7 @@ echo -n 'start123' > /tmp/secret/OU_JDBC_PASSWORD
 echo -n 'start123' > /tmp/secret/SMTP_PASSWORD
 echo -n 'start123' > /tmp/secret/K8S_DB_SECRET
 echo -n 'start123' > /tmp/secret/unisonKeystorePassword
-openssl rand -base64 32 > /tmp/secret/akeyless
+echo -n 'start123' > /tmp/secret/akeyless
 
 kubectl create secret generic orchestra-secrets-source -n openunison --from-file=/tmp/secret
 
@@ -100,9 +100,12 @@ helm upgrade --install orchestra tremolo/orchestra --namespace openunison -f /tm
 while [[ $(kubectl get pods -l app=openunison-orchestra -n openunison -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for pod" && sleep 1; done
 helm upgrade --install orchestra-login-portal tremolo/orchestra-login-portal --namespace openunison -f /tmp/openunison-values.yaml
 helm upgrade --install cluster-management tremolo/openunison-k8s-cluster-management -n openunison -f /tmp/openunison-values.yaml
+helm upgrade --install akeyless-lab openunison/akeyless-lab -n openunison -f /tmp/openunison-values.yaml 
+
 
 kubectl apply -f openunison/localhost-ingress.yaml
 
+kubectl delete pods -l app=openunison-orchestra -n openunison
 
 
 
