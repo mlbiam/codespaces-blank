@@ -1,0 +1,77 @@
+---
+apiVersion: openunison.tremolo.io/v2
+kind: Application
+metadata:
+  labels:
+    app.kubernetes.io/component: openunison-applications
+    app.kubernetes.io/instance: openunison-orchestra-login-portal
+    app.kubernetes.io/name: openunison
+    app.kubernetes.io/part-of: openunison
+  name: akeyless
+  namespace: {{ .Release.Namespace }}
+spec:
+  azTimeoutMillis: 3000
+  cookieConfig:
+    cookiesEnabled: true
+    domain: '#[OU_HOST]'
+    httpOnly: true
+    keyAlias: session-unison
+    logoutURI: /logout
+    scope: -1
+    secure: true
+    sessionCookieName: tremolosession
+    timeout: 900
+  isApp: false
+  urls:
+  - azRules:
+    - constraint: o=Tremolo
+      scope: dn
+    filterChain: []
+    hosts:
+    - '#[OU_HOST]'
+    idp:
+      className: com.tremolosecurity.idp.providers.OpenIDConnectIdP
+      mappings:
+        map:
+        - sourceType: user
+          targetAttributeName: sub
+          targetAttributeSource: sub
+        - sourceType: composite
+          targetAttributeName: name
+          targetAttributeSource: ${givename} ${sn}
+        - sourceType: user
+          targetAttributeName: preferred_username
+          targetAttributeSource: uid
+        - sourceType: user
+          targetAttributeName: Email
+          targetAttributeSource: mail
+        - sourceType: user
+          targetAttributeName: Groups
+          targetAttributeSource: groups
+        strict: true
+      params:
+        jwtSigningKey: unison-saml2-rp-sig
+        k8sNameSpace: 'openunison'
+        k8sTarget: k8s
+        sessionStoreClassName: com.tremolosecurity.oidc.k8s.K8sSessionStore
+      trusts:
+      - name: 'akeyless'
+        params:
+          accessTokenSkewMillis: "120000"
+          accessTokenTimeToLive: '60000'
+          authChainName: login-service
+          clientID: akeyless
+          codeLastMileKeyName: lastmile-oidc
+          codeTokenSkewMilis: '60000'
+          publicEndpoint: "true"
+          redirectURI: 
+          - https://console.akeyless.io/login-oidc
+          - https://auth.akeyless.io/oidc/callback
+        secretParams:
+        - name: clientSecret
+          secretName: orchestra-secrets-source
+          secretKey: akeyless
+    results:
+      auFail: default-login-failure
+      azFail: default-login-failure
+    uri: /auth/idp/akeyless
