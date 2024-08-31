@@ -1,0 +1,38 @@
+---
+apiVersion: openunison.tremolo.io/v2
+kind: Application
+metadata:
+  labels:
+    app.kubernetes.io/component: openunison-applications
+    app.kubernetes.io/instance: openunison-orchestra-login-portal
+    app.kubernetes.io/name: openunison
+    app.kubernetes.io/part-of: openunison
+  name: akeyless-gateway
+  namespace: {{ .Release.Namespace }}
+spec:
+  azTimeoutMillis: 3000
+  cookieConfig:
+    cookiesEnabled: true
+    domain: '{{ .Values.akeyless_gw_host }}'
+    httpOnly: true
+    keyAlias: session-unison
+    logoutURI: /logout
+    scope: -1
+    secure: true
+    sessionCookieName: tremolosession
+    timeout: 900
+  isApp: true
+  urls:
+  - azRules:
+    - constraint: o=Tremolo
+      scope: dn
+    filterChain: []
+    hosts:
+    - '{{ .Values.akeyless_gw_host }}'
+    
+    results:
+      auFail: default-login-failure
+      azFail: default-login-failure
+    uri: /
+    proxyTo: http://gw-akeyless-api-gateway.akeyless.svc:8000${fullURI}
+    authChain: anon
