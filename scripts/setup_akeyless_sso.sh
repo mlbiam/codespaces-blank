@@ -12,6 +12,11 @@ echo $CLIENT_SECRET
 AKEYLESS_ACCESS_ID=$(akeyless auth-method create oidc --name openunison --issuer "$ISSUER_URL" --client-id akeyless --client-secret $CLIENT_SECRET --unique-identifier sub | grep 'Access' | awk '{print $4}')
 
 echo "AKEYLESS Access ID $AKEYLESS_ACCESS_ID"
+echo "" >> /tmp/openunison-values.yaml
+echo "" >> /tmp/openunison-values.yaml
+
 echo "akeyless_access_id: $AKEYLESS_ACCESS_ID" >> /tmp/openunison-values.yaml
 
 helm upgrade --install akeyless-lab openunison/akeyless-lab -n openunison -f /tmp/openunison-values.yaml 
+
+akeyless assoc-role-am -r admin -a /openunison -s Groups=administrators-external
