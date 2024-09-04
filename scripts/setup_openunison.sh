@@ -80,7 +80,7 @@ kubectl create ns openunison
 
 kubectl create -f openunison/myvd-book.yaml
 
-sed "s/OU_HOST/$OU_HOST/g" < openunison/openunison-values-impersonation.yaml | sed "s/DB_HOST/$DB_HOST/g" | sed "s/API_HOST/$API_HOST/g" > /tmp/openunison-values.yaml
+sed "s/OU_HOST/$OU_HOST/g" < openunison/openunison-values-impersonation.yaml | sed "s/DB_HOST/$DB_HOST/g" | sed "s/API_HOST/$API_HOST/g" | sed "s/GHHOST/$CODESPACE_NAME/g" > /tmp/openunison-values.yaml
 
 echo "Deploying Orchestra"
 mkdir /tmp/secret
