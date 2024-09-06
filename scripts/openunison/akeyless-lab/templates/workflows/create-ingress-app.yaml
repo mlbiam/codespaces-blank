@@ -1,0 +1,49 @@
+---
+apiVersion: openunison.tremolo.io/v1
+kind: Workflow
+metadata:
+  name: create-ingress-app
+  namespace: {{ .Release.Namespace }}
+spec:
+  description: Generate openunison app objects
+  inList: false
+  label: generate openunison application objects
+  orgId: 43625c4c-43a5-4e48-89da-7005a60cfcff
+  tasks: |-
+    - taskType: customTask
+      className: com.tremolosecurity.provisioning.tasks.CreateK8sObject
+      params: 
+        targetName: k8s
+        template: |-
+          apiVersion: openunison.tremolo.io/v2
+          kind: Application
+          metadata:
+            name: openunison-$nameSpace$-$appPort$
+            namespace: {{ .Release.Namespace }}
+          spec:
+            azTimeoutMillis: 3000
+            cookieConfig:
+              cookiesEnabled: false
+              domain: '{{ .Values.vcluster.host }}-$appPort$.app.github.dev'
+              httpOnly: true
+              keyAlias: session-unison
+              logoutURI: /logout
+              scope: -1
+              secure: true
+              sessionCookieName: k8s-api-name
+              timeout: 900
+            isApp: true
+            urls:
+            - authChain: anon
+              azRules:
+              - constraint: (objectClass=*)
+                scope: filter
+              filterChain: []
+              hosts:
+              - '{{ .Values.vcluster.host }}-$appPort$.app.github.dev'
+              proxyTo: $proxyTo$${fullURI}
+              uri: /
+        srcType: yaml
+        writeToRequest: "$useGit$"
+        requestAttribute: git-secret-cluster-k8s-$nameSpace$
+        path: /yaml/ns/$nameSpace$/configmaps/vcluster-openunison-$nsName$.yaml

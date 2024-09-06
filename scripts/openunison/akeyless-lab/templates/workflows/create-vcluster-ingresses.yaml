@@ -1,0 +1,56 @@
+---
+apiVersion: openunison.tremolo.io/v1
+kind: Workflow
+metadata:
+  name: create-vcluster-ingresses
+  namespace: {{ .Release.Namespace }}
+spec:
+  description: Generate openunison app objects
+  inList: false
+  label: generate openunison application objects
+  orgId: 43625c4c-43a5-4e48-89da-7005a60cfcff
+  tasks: |-
+    - taskType: addAttribute
+      name: appPort
+      value: "$openunison_port$"
+      remove: false
+      addToRequest: true
+
+    - taskType: addAttribute
+      name: proxyTo
+      value: http://openunison-orchestra-x-openunison-x-$nameSpace$.$nameSpace$.svc
+      remove: false
+      addToRequest: true
+
+    - taskType: callWorkflow
+      name: create-ingress-app
+
+    - taskType: addAttribute
+      name: appPort
+      value: "$api_proxy_port$"
+      remove: false
+      addToRequest: true
+
+    - taskType: addAttribute
+      name: proxyTo
+      value: http://openunison-orchestra-x-openunison-x-$nameSpace$.$nameSpace$.svc
+      remove: false
+      addToRequest: true
+
+    - taskType: callWorkflow
+      name: create-ingress-app
+
+    - taskType: addAttribute
+      name: appPort
+      value: "$dashboard_port$"
+      remove: false
+      addToRequest: true
+
+    - taskType: addAttribute
+      name: proxyTo
+      value: http://kubernetes-dashboard-x-kubernetes-dashboard-x-$nameSpace$.$nameSpace$.svc
+      remove: false
+      addToRequest: true
+
+    - taskType: callWorkflow
+      name: create-ingress-app

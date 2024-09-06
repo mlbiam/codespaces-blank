@@ -36,7 +36,7 @@ spec:
                   api_server_host: "{{ .Values.vcluster.host }}-$api_proxy_port$.app.github.dev"
                   session_inactivity_timeout_seconds: 900
                   k8s_url: https://0.0.0.0:6443
-                  force_redirect_to_tls: true
+                  force_redirect_to_tls: false
                   createIngressCertificate: true
                   ingress_type: nginx
                   ingress_annotations: {}
