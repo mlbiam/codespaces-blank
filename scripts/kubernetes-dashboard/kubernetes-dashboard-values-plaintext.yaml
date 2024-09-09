@@ -1,0 +1,27 @@
+nginx:
+  enabled: false
+
+kong:
+  enabled: false
+
+api:
+  scaling:
+    replicas: 1
+  containers:
+    ports:
+    - name: api-tls
+      containerPort: 8000
+      protocol: TCP
+
+web:
+  scaling:
+    replicas: 1
+  containers:
+    ports:
+    - name: api-tls
+      containerPort: 8000
+      protocol: TCP
+
+auth:
+  scaling:
+    replicas: 0

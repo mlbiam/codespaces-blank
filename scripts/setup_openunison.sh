@@ -80,7 +80,9 @@ kubectl create ns openunison
 
 kubectl create -f openunison/myvd-book.yaml
 
-sed "s/OU_HOST/$OU_HOST/g" < openunison/openunison-values-impersonation.yaml | sed "s/DB_HOST/$DB_HOST/g" | sed "s/API_HOST/$API_HOST/g" | sed "s/GHHOST/$CODESPACE_NAME/g" > /tmp/openunison-values.yaml
+mkdir ~/conf
+
+sed "s/OU_HOST/$OU_HOST/g" < openunison/openunison-values-impersonation.yaml | sed "s/DB_HOST/$DB_HOST/g" | sed "s/API_HOST/$API_HOST/g" | sed "s/GHHOST/$CODESPACE_NAME/g" > ~/conf/openunison-values.yaml
 
 echo "Deploying Orchestra"
 mkdir /tmp/secret
@@ -94,13 +96,13 @@ echo -n 'start123' > /tmp/secret/akeyless
 kubectl create secret generic orchestra-secrets-source -n openunison --from-file=/tmp/secret
 
 
-helm upgrade --install openunison tremolo/openunison-operator --namespace openunison -f /tmp/openunison-values.yaml
+helm upgrade --install openunison tremolo/openunison-operator --namespace openunison -f ~/conf/openunison-values.yaml
 while [[ $(kubectl get pods -l app=openunison-operator -n openunison -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for operator pod" && sleep 1; done
-helm upgrade --install orchestra tremolo/orchestra --namespace openunison -f /tmp/openunison-values.yaml
+helm upgrade --install orchestra tremolo/orchestra --namespace openunison -f ~/conf/openunison-values.yaml
 while [[ $(kubectl get pods -l app=openunison-orchestra -n openunison -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for pod" && sleep 1; done
-helm upgrade --install orchestra-login-portal tremolo/orchestra-login-portal --namespace openunison -f /tmp/openunison-values.yaml
-helm upgrade --install cluster-management tremolo/openunison-k8s-cluster-management -n openunison -f /tmp/openunison-values.yaml
-helm upgrade --install akeyless-lab openunison/akeyless-lab -n openunison -f /tmp/openunison-values.yaml 
+helm upgrade --install orchestra-login-portal tremolo/orchestra-login-portal --namespace openunison -f ~/conf/openunison-values.yaml
+helm upgrade --install cluster-management tremolo/openunison-k8s-cluster-management -n openunison -f ~/conf/openunison-values.yaml
+helm upgrade --install akeyless-lab openunison/akeyless-lab -n openunison -f ~/conf/openunison-values.yaml 
 
 
 kubectl apply -f openunison/localhost-ingress.yaml
