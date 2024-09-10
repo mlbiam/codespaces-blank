@@ -56,10 +56,10 @@ spec:
                     k3s:
                       enabled: true
                       extraArgs:
-                      - kube-apiserver-flag=oidc-issuer-url=https://{{ .Values.vcluster.host }}-443.app.github.dev/auth/idp/k8sIdp
-                      - kube-apiserver-flag=oidc-client-id=kubernetes
-                      - kube-apiserver-flag=oidc-username-claim=sub
-                      - kube-apiserver-flag=oidc-groups-claim=groups
+                      - --kube-apiserver-arg=oidc-issuer-url=https://{{ .Values.vcluster.host }}-443.app.github.dev/auth/idp/k8sIdp
+                      - --kube-apiserver-arg=oidc-client-id=kubernetes
+                      - --kube-apiserver-arg=oidc-username-claim=sub
+                      - --kube-apiserver-arg=oidc-groups-claim=groups
                   statefulSet:
                     highAvailability:
                       replicas: 1

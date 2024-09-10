@@ -16,11 +16,11 @@ spec:
     #   remove: false
     #   addToRequest: true
     
-    # - taskType: addAttribute
-    #   name: nsName
-    #   value: test
-    #   remove: false
-    #   addToRequest: true
+    - taskType: addAttribute
+      name: nsName
+      value: $nameSpace$
+      remove: false
+      addToRequest: true
 
     - taskType: callWorkflow
       name: create-vcluster-db
@@ -28,11 +28,8 @@ spec:
     - taskType: callWorkflow
       name: deploy-vcluster
 
-    # - taskType: callWorkflow
-    #   name: deploy-openunison-to-vcluster
-
-    # - taskType: callWorkflow
-    #   name: create-vcluster-ingresses
+    - taskType: callWorkflow
+      name: deploy-openunison-to-vcluster
 
     # - taskType: callWorkflow
     #   name: integrate-vault-vcluster
