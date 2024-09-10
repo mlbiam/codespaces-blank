@@ -67,6 +67,8 @@ spec:
           redirectURI: 
           - https://console.akeyless.io/login-oidc
           - https://auth.akeyless.io/oidc/callback
+          - https://{{ .Values.akeyless_gw_host }}/gw/oidc/callback
+          - https://{{ .Values.akeyless_gw_host }}/gw/login-oidc
         secretParams:
         - name: clientSecret
           secretName: orchestra-secrets-source

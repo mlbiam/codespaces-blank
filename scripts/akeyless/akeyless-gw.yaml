@@ -1,0 +1,15 @@
+akeylessUserAuth:
+  adminAccessId: AKEYLESS_ACCESS_ID
+  adminAccessKey: AKEYLESS_KEY
+  clusterName: https://GW_HOST/gw/
+  allowedAccessPermissions:
+     - name: openunison
+       access_id: AUTH_ID
+       sub_claims:
+         Groups:
+           - administrators-external
+       case_sensitive: false
+       permissions:
+         - admin
+service:
+  type: ClusterIP
