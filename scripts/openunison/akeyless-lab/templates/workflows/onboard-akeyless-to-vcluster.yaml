@@ -2,7 +2,7 @@
 apiVersion: openunison.tremolo.io/v1
 kind: Workflow
 metadata:
-  name: integrate-vault-vcluster
+  name: integrate-akeyless-vcluster
   namespace: {{ .Release.Namespace }}
 spec:
   description: Integrate vCluster and AKEYLESS
@@ -173,7 +173,7 @@ spec:
               "gateway-url": "https://{{ .Values.akeyless_gw_host }}/gw/",
               "token": apiToken,
               "token-reviewer-jwt": respToken.status.token,
-              "k8s-host": nsName + "." + nsName + ".svc",
+              "k8s-host": nsName + "." + nsName ,
               "k8s-ca-cert": Base64.getEncoder().encodeToString(JSUtils.string2bytes(cert)),
               "k8s-auth-type": "token"
             });

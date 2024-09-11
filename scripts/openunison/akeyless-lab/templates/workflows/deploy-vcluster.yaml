@@ -60,7 +60,6 @@ spec:
                       - --kube-apiserver-arg=oidc-client-id=kubernetes
                       - --kube-apiserver-arg=oidc-username-claim=sub
                       - --kube-apiserver-arg=oidc-groups-claim=groups
-                      - --tls-san=$nsName$.$nsName$.svc
                   statefulSet:
                     highAvailability:
                       replicas: 1

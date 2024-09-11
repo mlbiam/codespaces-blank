@@ -95,3 +95,10 @@ Once the gateways are running, login to the akeyless console, then:
 1. Users & Auth Methods
 2. openunison
 3. Add `https://githubspaceshost-10446.app.github.dev/gw/login-oidc` to Allowed Redirect URIs where githubspaceshost is the name of your github codespace
+
+Setup Kubernetes Authentication
+
+```bash
+$ cd scripts
+$ ./setup_k8s_auth_cp.sh
+```

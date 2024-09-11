@@ -14,10 +14,14 @@ akeylessUserAuth:
        permissions:
          - admin
      - name: openunison-api
-       access_id: K8S_AUTH_ID
+       access_id: AUTH_K8S_ID
        sub_claims:
-         Groups:
-           - administrators-external
+          service_account_name:
+          - openunison-orchestra
+          namespace:
+          - openunison
+          config_name:
+          - k8s-cp-conf
        case_sensitive: false
        permissions:
          - admin

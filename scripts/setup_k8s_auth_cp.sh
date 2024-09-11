@@ -24,3 +24,10 @@ helm upgrade --install akeyless-lab openunison/akeyless-lab -n openunison -f ~/c
 
 
 akeyless assoc-role-am -r admin -a /k8s-cp -s namespace=openunison -s service_account_name=openunison-orchestra -s config_name=k8s-cp-conf
+
+cat ~/conf/akeyless-gw.yaml | sed "s,AUTH_K8S_ID,$ACCESS_ID,g" > /tmp/akeyless-gw.yaml
+mv /tmp/akeyless-gw.yaml ~/conf/akeyless-gw.yaml
+
+helm upgrade --install gw akeyless/akeyless-api-gateway -n akeyless -f ~/conf/akeyless-gw.yaml
+
+kubectl delete pods --all -n akeyless
