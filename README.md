@@ -71,6 +71,8 @@ $ cd scripts
 $ ./setup_akeyless_sso.sh
 ```
 
+***If you see the error `failed to create auth method: Desc: auth method creation failed, Error: Desc: Failed to create auth method. Status 400 Bad Request, Error: InvalidParam. Message: account id: acc-eml1vex0l1Tm, access id: p-vbkes1ww9i6uam. Desc: Failed to create access. Status 400 Bad Request, Error: InvalidAccessParams. Message: failed to load provider issuer`, the 443 port forwarder is not set to public***
+
 Setup Gateway
 
 ```bash
@@ -87,3 +89,9 @@ NAME                                      READY   STATUS    RESTARTS   AGE
 gw-akeyless-api-gateway-7c8bcdb55-7wdxs   0/1     Running   0          2m
 gw-akeyless-api-gateway-7c8bcdb55-z96bv   0/1     Running   0          2m
 ```
+
+Once the gateways are running, login to the akeyless console, then:
+
+1. Users & Auth Methods
+2. openunison
+3. Add `https://githubspaceshost-10446.app.github.dev/gw/login-oidc` to Allowed Redirect URIs where githubspaceshost is the name of your github codespace

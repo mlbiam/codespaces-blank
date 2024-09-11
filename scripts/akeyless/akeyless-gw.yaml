@@ -13,5 +13,13 @@ akeylessUserAuth:
        case_sensitive: false
        permissions:
          - admin
+     - name: openunison-api
+       access_id: K8S_AUTH_ID
+       sub_claims:
+         Groups:
+           - administrators-external
+       case_sensitive: false
+       permissions:
+         - admin
 service:
   type: ClusterIP

@@ -109,6 +109,12 @@ kubectl apply -f openunison/localhost-ingress.yaml
 
 kubectl delete pods -l app=openunison-orchestra -n openunison
 
+helm repo add external-secrets https://charts.external-secrets.io
+
+helm upgrade --install external-secrets \
+   external-secrets/external-secrets \
+    -n external-secrets \
+    --create-namespace
 
 
 

@@ -21,3 +21,6 @@ echo "" >> ~/conf/openunison-values.yaml
 echo "akeyless_k8s_auth_id: $ACCESS_ID" >> ~/conf/openunison-values.yaml
 
 helm upgrade --install akeyless-lab openunison/akeyless-lab -n openunison -f ~/conf/openunison-values.yaml 
+
+
+akeyless assoc-role-am -r admin -a /k8s-cp -s namespace=openunison -s service_account_name=openunison-orchestra -s config_name=k8s-cp-conf

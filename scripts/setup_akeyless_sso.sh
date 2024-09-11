@@ -11,7 +11,8 @@ echo $CLIENT_SECRET
 
 GW_HOST="$CODESPACE_NAME-10446.app.github.dev"
 
-AKEYLESS_ACCESS_ID=$(akeyless auth-method create oidc --name openunison --issuer "$ISSUER_URL" --client-id akeyless --client-secret $CLIENT_SECRET --unique-identifier sub  --allowed-redirect-uri "https://console.akeyless.io/login-oidc,https://zerotrust.akeyless.io,http://127.0.0.1:*,http://localhost:*,https://$GW_HOST/gw/login-oidc" | grep 'Access' | awk '{print $4}')
+#AKEYLESS_ACCESS_ID=$(akeyless auth-method create oidc --name openunison --issuer "$ISSUER_URL" --client-id akeyless --client-secret $CLIENT_SECRET --unique-identifier sub  --allowed-redirect-uri "https://console.akeyless.io/login-oidc,https://zerotrust.akeyless.io,http://127.0.0.1:*,http://localhost:*,https://$GW_HOST/gw/login-oidc" | grep 'Access' | awk '{print $4}')
+AKEYLESS_ACCESS_ID=$(akeyless auth-method create oidc --name openunison --issuer "$ISSUER_URL" --client-id akeyless --client-secret $CLIENT_SECRET --unique-identifier sub   | grep 'Access' | awk '{print $4}')
 
 echo "AKEYLESS Access ID $AKEYLESS_ACCESS_ID"
 echo "" >> ~/conf/openunison-values.yaml

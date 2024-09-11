@@ -1,0 +1,217 @@
+---
+apiVersion: openunison.tremolo.io/v1
+kind: Workflow
+metadata:
+  name: integrate-vault-vcluster
+  namespace: {{ .Release.Namespace }}
+spec:
+  description: Integrate vCluster and AKEYLESS
+  inList: true
+  label: Integrate vCluster and AKEYLESS
+  orgId: B158BD40-0C1B-11E3-8FFD-0800200C9A66
+  tasks: |-
+    - taskType: addAttribute
+      name: nsName
+      value: tenant1
+      remove: false
+      addToRequest: true
+
+    - taskType: addAttribute
+      name: nameSpace
+      value: tenant1
+      remove: false
+      addToRequest: true
+
+    - taskType: customTask
+      className: com.tremolosecurity.provisioning.customTasks.PrintUserInfo
+      params:
+        message: "initialization"
+
+    # Create a namespace in the vclsuter to host the token used by the gateway
+    - taskType: customTask
+      className: com.tremolosecurity.provisioning.tasks.CreateK8sObject
+      params: 
+        targetName: k8s-vcluster-$nsName$
+        template: |-
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+              name: akeyless-gateway
+            spec: {}
+        srcType: yaml
+
+    # create a ServiceAccount for the gateway to use
+    - taskType: customTask
+      className: com.tremolosecurity.provisioning.tasks.CreateK8sObject
+      params: 
+        targetName: k8s-vcluster-$nsName$
+        template: |-
+            apiVersion: v1
+            kind: ServiceAccount
+            metadata:
+              name: akeyless-client
+              namespace: akeyless-gateway
+        srcType: yaml
+
+    # create a ClusterRoleBinding that will allow the gateway to validate tokens
+    - taskType: customTask
+      className: com.tremolosecurity.provisioning.tasks.CreateK8sObject
+      params: 
+        targetName: k8s-vcluster-$nsName$
+        template: |-
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: ClusterRoleBinding
+            metadata:
+              name: role-tokenreview-binding
+            roleRef:
+              apiGroup: rbac.authorization.k8s.io
+              kind: ClusterRole
+              name: system:auth-delegator
+            subjects:
+            - kind: ServiceAccount
+              name: akeyless-client
+              namespace: akeyless-gateway
+        srcType: yaml
+
+    
+
+    - taskType: customTask
+      className: com.tremolosecurity.provisioning.customTasks.JavaScriptTask
+      params:
+        javaScript: |-
+          function init(task,params) {
+            // nothing to do
+          }
+
+          function reInit(task) {
+            // do nothing
+          }
+
+          function doTask(user,request) {
+            System = Java.type("java.lang.System");
+            HttpClient = Java.type("java.net.http.HttpClient");
+            HttpRequest = Java.type("java.net.http.HttpRequest");
+            URI = Java.type("java.net.URI");
+            BodyPublishers = Java.type("java.net.http.HttpRequest.BodyPublishers");
+            BodyHandlers = Java.type("java.net.http.HttpResponse.BodyHandlers");
+            K8sUtils = Java.type("com.tremolosecurity.k8s.util.K8sUtils");
+            JSUtils = Java.type("com.tremolosecurity.util.JSUtils");
+            Base64 = Java.type("java.util.Base64");
+
+            ActionType = Java.type("com.tremolosecurity.provisioning.core.ProvisioningUtil.ActionType");
+            var nsName = request.get("nameSpace").toLowerCase();
+            request.put("nsName",nsName);
+            var approvalID = 0;
+            if (request.containsKey("APPROVAL_ID")) {
+              approvalID = request.get("APPROVAL_ID");
+            }
+
+            System.out.println("IN ONBOARD");
+            // get the k8s target to get a token
+            k8s = task.getConfigManager().getProvisioningEngine().getTarget("k8s").getProvider();
+            payload = JSON.stringify({
+              "access-id": "{{ .Values.akeyless_k8s_auth_id }}",
+              "access-type": "k8s",
+              "k8s-auth-config-name": "k8s-cp-conf",
+              "gateway-url": "https://{{ .Values.akeyless_gw_host }}/gw/",
+              "k8s-service-account-token": Base64.getEncoder().encodeToString(JSUtils.string2bytes(k8s.getAuthToken()))
+            });
+
+
+            http = HttpClient.newBuilder().build();
+            authTokenRequest = HttpRequest.newBuilder()
+                                          .uri(URI.create("http://gw-akeyless-api-gateway.akeyless.svc:8081/auth"))
+                                          .header("Content-Type", "application/json")
+                                          .header("Accept", "application/json")
+                                          .POST(BodyPublishers.ofString(payload))
+                                          .build();
+
+            response = http.send(authTokenRequest, BodyHandlers.ofString());
+            jsonResp = response.body();
+
+            System.out.println(jsonResp);
+
+            var apiToken = JSON.parse(jsonResp)["token"];
+
+            // create a k8s auth for the vcluster in akeyless
+            payload = JSON.stringify({
+              "name": "k8s-vcluster-" + nsName,
+              "token": apiToken,
+              "gen-key": "true"
+            });
+
+            authTokenRequest = HttpRequest.newBuilder()
+                                          .uri(URI.create("http://gw-akeyless-api-gateway.akeyless.svc:8081/create-auth-method-k8s"))
+                                          .header("Content-Type", "application/json")
+                                          .header("Accept", "application/json")
+                                          .POST(BodyPublishers.ofString(payload))
+                                          .build();
+
+            response = http.send(authTokenRequest, BodyHandlers.ofString());
+            jsonResp = response.body();
+
+            System.out.println(jsonResp);
+
+            var authData = JSON.parse(jsonResp);
+
+            // configure the gateway to authenticate tokens from our vcluster
+
+            vcluster = task.getConfigManager().getProvisioningEngine().getTarget("k8s-vcluster-" + nsName).getProvider();
+            vclusterHttp = vcluster.createClient();
+
+            respToken = JSON.parse(vcluster.callWSPost(vcluster.getAuthToken(),vclusterHttp,"/api/v1/namespaces/akeyless-gateway/serviceaccounts/akeyless-client/token",JSON.stringify({"kind":"TokenRequest","apiVersion":"authentication.k8s.io/v1","metadata":{"creationTimestamp":null},"spec":{"audiences":null,"expirationSeconds":31212000,"boundObjectRef":null},"status":{"token":"","expirationTimestamp":null}})));
+
+            System.out.println("sa token:" + respToken.status.token);
+
+            request.put("k8s_access_id",authData["access_id"]);
+
+            var cert = K8sUtils.loadConfigMap("k8s",nsName,"kube-root-ca.crt-x-kube-system-x-" + nsName ).get("ca.crt");
+            payload = JSON.stringify({
+              "access-id": authData["access_id"],
+              "name": "k8s-vcluster-" + nsName + "-conf",
+              "signing-key": authData["prv_key"],
+              "gateway-url": "https://{{ .Values.akeyless_gw_host }}/gw/",
+              "token": apiToken,
+              "token-reviewer-jwt": respToken.status.token,
+              "k8s-host": nsName + "." + nsName + ".svc",
+              "k8s-ca-cert": Base64.getEncoder().encodeToString(JSUtils.string2bytes(cert)),
+              "k8s-auth-type": "token"
+            });
+
+            System.out.println("payload: " + payload);
+
+            authTokenRequest = HttpRequest.newBuilder()
+                                          .uri(URI.create("http://gw-akeyless-api-gateway.akeyless.svc:8081/gateway-create-k8s-auth-config"))
+                                          .header("Content-Type", "application/json")
+                                          .header("Accept", "application/json")
+                                          .POST(BodyPublishers.ofString(payload))
+                                          .build();
+
+            response = http.send(authTokenRequest, BodyHandlers.ofString());
+            jsonResp = response.body();
+
+            System.out.println(jsonResp);
+
+            return true;
+          }
+
+    # create a ClusterSecretStore in the vcluster
+    - taskType: customTask
+      className: com.tremolosecurity.provisioning.tasks.CreateK8sObject
+      params: 
+        targetName: k8s-vcluster-$nsName$
+        template: |-
+            apiVersion: external-secrets.io/v1beta1
+            kind: ClusterSecretStore
+            metadata:
+              name: akeyless
+            spec:
+              provider:
+                akeyless:
+                  # URL of your akeyless API
+                  akeylessGWApiURL: "https://{{ .Values.akeyless_gw_host }}/gw/"
+                  authSecretRef:
+                    kubernetesAuth:
+                      accessID: "$k8s_access_id$"
+                      k8sConfName: "k8s-vcluster-$nsName$-conf"
+        srcType: yaml
