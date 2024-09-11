@@ -1,0 +1,15 @@
+{{ if .Values.akeyless_k8s_auth_id }}
+apiVersion: external-secrets.io/v1beta1
+kind: ClusterSecretStore
+metadata:
+  name: akeyless
+spec:
+  provider:
+    akeyless:
+      # URL of your akeyless API
+      akeylessGWApiURL: "http://gw-akeyless-api-gateway.akeyless.svc:8000"
+      authSecretRef:
+        kubernetesAuth:
+          accessID: "{{ .Values.akeyless_k8s_auth_id }}"
+          k8sConfName: "k8s-cp-conf"
+{{ end }}

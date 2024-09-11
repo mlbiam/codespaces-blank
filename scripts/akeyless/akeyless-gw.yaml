@@ -1,7 +1,9 @@
+env:
+- name: CLUSTER_URL
+  value: https://GW_HOST/gw/
 akeylessUserAuth:
   adminAccessId: AKEYLESS_ACCESS_ID
   adminAccessKey: AKEYLESS_KEY
-  clusterName: https://GW_HOST/gw/
   allowedAccessPermissions:
      - name: openunison
        access_id: AUTH_ID

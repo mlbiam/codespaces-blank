@@ -7,8 +7,17 @@ PRIV_KEY=$(echo $K8S_CP_AUTH | jq -r '.prv_key')
 
 GW_HOST="$CODESPACE_NAME-10446.app.github.dev"
 
+
+
 akeyless gateway-create-k8s-auth-config  --name k8s-cp-conf \
 --gateway-url https://$GW_HOST/gw \
 --access-id $ACCESS_ID \
 --signing-key $PRIV_KEY \
 --use-gw-service-account
+
+echo "" >> ~/conf/openunison-values.yaml
+echo "" >> ~/conf/openunison-values.yaml
+
+echo "akeyless_k8s_auth_id: $ACCESS_ID" >> ~/conf/openunison-values.yaml
+
+helm upgrade --install akeyless-lab openunison/akeyless-lab -n openunison -f ~/conf/openunison-values.yaml 
