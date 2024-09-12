@@ -79,10 +79,10 @@ data:
     kubectl ctx
 
     kubectl create ns kubernetes-dashboard
-    helm install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard   --set settings.clusterName=$VCLUSTER_LABEL --set settings.itemsPerPage=15 -f /scripts/kubernetes-dashboard-values.yaml  -n kubernetes-dashboard
+    helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard   --set settings.clusterName=$VCLUSTER_LABEL --set settings.itemsPerPage=15 -f /scripts/kubernetes-dashboard-values.yaml  -n kubernetes-dashboard --wait --wait-for-jobs
 
     helm repo add external-secrets https://charts.external-secrets.io
-    helm upgrade --install external-secrets external-secrets/external-secrets -n external-secrets --create-namespace
+    helm upgrade --install external-secrets external-secrets/external-secrets -n external-secrets --create-namespace --wait --wait-for-jobs
 
     #while [[ $(kubectl get pods -l app.kubernetes.io/name=external-secrets-webhook -n external-secrets -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for external-secrets webhook" && sleep 1; done
     #while [[ $(kubectl get pods -l app.kubernetes.io/name=external-secrets -n external-secrets -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for external-secrets controller" && sleep 1; done
