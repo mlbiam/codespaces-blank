@@ -10,22 +10,22 @@ spec:
   label: Integrate vCluster and AKEYLESS
   orgId: B158BD40-0C1B-11E3-8FFD-0800200C9A66
   tasks: |-
-    - taskType: addAttribute
-      name: nsName
-      value: tenant1
-      remove: false
-      addToRequest: true
+    # - taskType: addAttribute
+    #   name: nsName
+    #   value: tenant1
+    #   remove: false
+    #   addToRequest: true
 
-    - taskType: addAttribute
-      name: nameSpace
-      value: tenant1
-      remove: false
-      addToRequest: true
+    # - taskType: addAttribute
+    #   name: nameSpace
+    #   value: tenant1
+    #   remove: false
+    #   addToRequest: true
 
-    - taskType: customTask
-      className: com.tremolosecurity.provisioning.customTasks.PrintUserInfo
-      params:
-        message: "initialization"
+    # - taskType: customTask
+    #   className: com.tremolosecurity.provisioning.customTasks.PrintUserInfo
+    #   params:
+    #     message: "initialization"
 
     # Create a namespace in the vclsuter to host the token used by the gateway
     - taskType: customTask
