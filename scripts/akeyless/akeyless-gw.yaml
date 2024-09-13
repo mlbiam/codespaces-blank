@@ -1,3 +1,5 @@
+service:
+  type: ClusterIP
 env:
 - name: CLUSTER_URL
   value: https://GW_HOST/gw/
@@ -13,17 +15,3 @@ akeylessUserAuth:
        case_sensitive: false
        permissions:
          - admin
-     - name: openunison-api
-       access_id: AUTH_K8S_ID
-       sub_claims:
-          service_account_name:
-          - openunison-orchestra
-          namespace:
-          - openunison
-          config_name:
-          - k8s-cp-conf
-       case_sensitive: false
-       permissions:
-         - admin
-service:
-  type: ClusterIP
