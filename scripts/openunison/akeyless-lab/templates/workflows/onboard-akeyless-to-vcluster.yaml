@@ -6,7 +6,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   description: Integrate vCluster and AKEYLESS
-  inList: true
+  inList: false
   label: Integrate vCluster and AKEYLESS
   orgId: B158BD40-0C1B-11E3-8FFD-0800200C9A66
   tasks: |-
@@ -195,23 +195,4 @@ spec:
             return true;
           }
 
-    # create a ClusterSecretStore in the vcluster
-    - taskType: customTask
-      className: com.tremolosecurity.provisioning.tasks.CreateK8sObject
-      params: 
-        targetName: k8s-vcluster-$nsName$
-        template: |-
-            apiVersion: external-secrets.io/v1beta1
-            kind: ClusterSecretStore
-            metadata:
-              name: akeyless
-            spec:
-              provider:
-                akeyless:
-                  # URL of your akeyless API
-                  akeylessGWApiURL: "https://{{ .Values.akeyless_gw_host }}/gw/"
-                  authSecretRef:
-                    kubernetesAuth:
-                      accessID: "$k8s_access_id$"
-                      k8sConfName: "k8s-vcluster-$nsName$-conf"
-        srcType: yaml
+

@@ -120,15 +120,6 @@ openunison:
     forms:
       new_namespace:
         additional_attributes:
-        - name: openunison_port
-          displayName: OpenUnison Port
-          regEx: "[0-9]*"
-          regExFailedMessage: "Ports must be a number"
-          minChars: 0
-          maxChars: 0
-          unique: false
-          type: text
-          required: true
         - name: dashboard_port
           displayName: Dashboard Port
           regEx: "[0-9]*"

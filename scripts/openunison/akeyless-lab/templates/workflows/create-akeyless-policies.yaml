@@ -1,0 +1,279 @@
+---
+apiVersion: openunison.tremolo.io/v1
+kind: Workflow
+metadata:
+  name: create-akeyless-policies
+  namespace: {{ .Release.Namespace }}
+spec:
+  description: Create AKEYLESS policies
+  inList: false
+  label: Create akeyless policies
+  orgId: B158BD40-0C1B-11E3-8FFD-0800200C9A66
+  tasks: |-
+    # - taskType: addAttribute
+    #   name: nsName
+    #   value: tenant1
+    #   remove: false
+    #   addToRequest: true
+
+    # - taskType: addAttribute
+    #   name: nameSpace
+    #   value: tenant1
+    #   remove: false
+    #   addToRequest: true
+
+    - taskType: customTask
+      className: com.tremolosecurity.provisioning.customTasks.PrintUserInfo
+      params:
+        message: "initialization"
+
+    
+
+    
+
+    - taskType: customTask
+      className: com.tremolosecurity.provisioning.customTasks.JavaScriptTask
+      params:
+        javaScript: |-
+          function init(task,params) {
+            // nothing to do
+          }
+
+          function reInit(task) {
+            // do nothing
+          }
+
+          function doTask(user,request) {
+            System = Java.type("java.lang.System");
+            HttpClient = Java.type("java.net.http.HttpClient");
+            HttpRequest = Java.type("java.net.http.HttpRequest");
+            URI = Java.type("java.net.URI");
+            BodyPublishers = Java.type("java.net.http.HttpRequest.BodyPublishers");
+            BodyHandlers = Java.type("java.net.http.HttpResponse.BodyHandlers");
+            K8sUtils = Java.type("com.tremolosecurity.k8s.util.K8sUtils");
+            JSUtils = Java.type("com.tremolosecurity.util.JSUtils");
+            Base64 = Java.type("java.util.Base64");
+
+            ActionType = Java.type("com.tremolosecurity.provisioning.core.ProvisioningUtil.ActionType");
+            var nsName = request.get("nameSpace").toLowerCase();
+            request.put("nsName",nsName);
+            var approvalID = 0;
+            if (request.containsKey("APPROVAL_ID")) {
+              approvalID = request.get("APPROVAL_ID");
+            }
+
+            System.out.println("IN ONBOARD");
+            // get the k8s target to get a token
+            k8s = task.getConfigManager().getProvisioningEngine().getTarget("k8s").getProvider();
+            payload = JSON.stringify({
+              "access-id": "{{ .Values.akeyless_k8s_auth_id }}",
+              "access-type": "k8s",
+              "k8s-auth-config-name": "k8s-cp-conf",
+              "gateway-url": "https://{{ .Values.akeyless_gw_host }}/gw/",
+              "k8s-service-account-token": Base64.getEncoder().encodeToString(JSUtils.string2bytes(k8s.getAuthToken()))
+            });
+
+
+            http = HttpClient.newBuilder().build();
+            authTokenRequest = HttpRequest.newBuilder()
+                                          .uri(URI.create("http://gw-akeyless-api-gateway.akeyless.svc:8081/auth"))
+                                          .header("Content-Type", "application/json")
+                                          .header("Accept", "application/json")
+                                          .POST(BodyPublishers.ofString(payload))
+                                          .build();
+
+            response = http.send(authTokenRequest, BodyHandlers.ofString());
+            jsonResp = response.body();
+
+            System.out.println(jsonResp);
+
+            var apiToken = JSON.parse(jsonResp)["token"];
+
+
+            payload = JSON.stringify({
+              "name": "tenant-" + nsName,
+              "token": apiToken
+            });
+
+            authTokenRequest = HttpRequest.newBuilder()
+                                          .uri(URI.create("http://gw-akeyless-api-gateway.akeyless.svc:8081/create-role"))
+                                          .header("Content-Type", "application/json")
+                                          .header("Accept", "application/json")
+                                          .POST(BodyPublishers.ofString(payload))
+                                          .build();
+
+            response = http.send(authTokenRequest, BodyHandlers.ofString());
+            jsonResp = response.body();
+
+            System.out.println(jsonResp);
+
+
+            payload = JSON.stringify({
+              "am-name": "/openunison",
+              "role-name": "tenant-" + nsName,
+              "sub-claims": {
+                "Groups": "k8s-namespace-administrators-k8s-" + nsName + "-external"
+              },
+              "token": apiToken
+            });
+
+            authTokenRequest = HttpRequest.newBuilder()
+                                          .uri(URI.create("http://gw-akeyless-api-gateway.akeyless.svc:8081/assoc-role-am"))
+                                          .header("Content-Type", "application/json")
+                                          .header("Accept", "application/json")
+                                          .POST(BodyPublishers.ofString(payload))
+                                          .build();
+
+            response = http.send(authTokenRequest, BodyHandlers.ofString());
+            jsonResp = response.body();
+
+            System.out.println(jsonResp);
+
+
+            payload = JSON.stringify({
+              "path": "/*",
+              "capability": [
+                  "list"
+              ],
+              "rule-type": "auth-method-rule",
+              "role-name": "tenant-" + nsName,
+              "token": apiToken
+            });
+
+            authTokenRequest = HttpRequest.newBuilder()
+                                          .uri(URI.create("http://gw-akeyless-api-gateway.akeyless.svc:8081/set-role-rule"))
+                                          .header("Content-Type", "application/json")
+                                          .header("Accept", "application/json")
+                                          .POST(BodyPublishers.ofString(payload))
+                                          .build();
+
+            response = http.send(authTokenRequest, BodyHandlers.ofString());
+            jsonResp = response.body();
+
+            System.out.println(jsonResp);
+
+            payload = JSON.stringify({
+              "path": "/tenants/" + nsName + "/secrets/*",
+              "capability": [
+                  "read",
+                  "list",
+                  "update",
+                  "delete",
+                  "create"
+              ],
+              "rule-type": "item-rule",
+              "role-name": "tenant-" + nsName,
+              "token": apiToken
+            });
+
+            authTokenRequest = HttpRequest.newBuilder()
+                                          .uri(URI.create("http://gw-akeyless-api-gateway.akeyless.svc:8081/set-role-rule"))
+                                          .header("Content-Type", "application/json")
+                                          .header("Accept", "application/json")
+                                          .POST(BodyPublishers.ofString(payload))
+                                          .build();
+
+            response = http.send(authTokenRequest, BodyHandlers.ofString());
+            jsonResp = response.body();
+
+            System.out.println(jsonResp);
+
+            payload = JSON.stringify({
+              "path": "/tenants/" + nsName + "/*",
+              "capability": [
+                  "read",
+                  "list",
+                  "update",
+                  "delete",
+                  "create"
+              ],
+              "rule-type": "role-rule",
+              "role-name": "tenant-" + nsName,
+              "token": apiToken
+            });
+
+            authTokenRequest = HttpRequest.newBuilder()
+                                          .uri(URI.create("http://gw-akeyless-api-gateway.akeyless.svc:8081/set-role-rule"))
+                                          .header("Content-Type", "application/json")
+                                          .header("Accept", "application/json")
+                                          .POST(BodyPublishers.ofString(payload))
+                                          .build();
+
+            response = http.send(authTokenRequest, BodyHandlers.ofString());
+            jsonResp = response.body();
+
+            System.out.println(jsonResp);
+
+
+            var policy = {
+                "role_name": "tenants/vcluster-" + nsName,
+                "rules": {
+                    "path_rules": [
+                        {
+                            "path": "/*",
+                            "capabilities": [
+                                "list"
+                            ],
+                            "type": "auth-method-rule",
+                            "start_time": 0
+                        },
+                        {
+                            "path": "/tenants/" + nsName + "/secrets/*",
+                            "capabilities": [
+                                "read",
+                                "list",
+                                "update",
+                                "delete",
+                                "create"
+                            ],
+                            "type": "item-rule",
+                            "start_time": 0
+                        },
+                        {
+                            "path": "/tenants/" + nsName + "/*",
+                            "capabilities": [
+                                "read",
+                                "list",
+                                "update",
+                                "delete",
+                                "create"
+                            ],
+                            "type": "role-rule",
+                            "start_time": 0
+                        }
+                    ],
+                    "admin": false
+                },
+                "comment": "",
+                "role_auth_methods_assoc": [
+                    {
+                        "assoc_id": "ass-udkix0r6hyg3ynd3dl01",
+                        "auth_method_name": "openunison",
+                        "auth_method_access_id": "{{ .Values.akeyless_access_id }}",
+                        "auth_method_sub_claims": {
+                            "Groups": [
+                                "k8s-namespace-administrators-k8s-" + nsName + "-external"
+                            ]
+                        },
+                        "sub_claims_case_sensitive": false
+                    }
+                ],
+                "client_permissions": [
+                    "read",
+                    "list",
+                    "update",
+                    "delete",
+                    "create",
+                    "sra_transparently_connect",
+                    "sra_request_for_access",
+                    "sra_require_justification",
+                    "sra_approval_authority",
+                    "sra_upload_files",
+                    "sra_download_files"
+                ],
+                "delete_protection": false
+            };
+
+
+            return true;
+          }

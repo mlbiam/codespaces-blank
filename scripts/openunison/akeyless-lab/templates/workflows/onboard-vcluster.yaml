@@ -33,3 +33,9 @@ spec:
 
     - taskType: callWorkflow
       name: integrate-akeyless-vcluster
+
+    - taskType: callWorkflow
+      name: create-akeyless-policies
+
+    - taskType: callWorkflow
+      name: create-akeyless-external-secret-store
